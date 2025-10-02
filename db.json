@@ -1,0 +1,26 @@
+{
+  "countries": [
+    { "id": 1, "name": "Colombia" }
+  ],
+  "regions": [
+    { "id": 1, "name": "Antioquia", "countryId": 1 }
+  ],
+  "cities": [
+    { "id": 1, "name": "Medellín", "regionId": 1 }
+  ],
+  "companies": [
+    { "id": 1, "name": "OpenAI S.A.S" }
+  ],
+  "branches": [
+    {
+      "id": 1,
+      "numberCommercial": "001",
+      "address": "Calle 10 #20-30",
+      "email": "contacto@openai.com",
+      "contact_name": "Juan Pérez",
+      "phone": "3001234567",
+      "cityId": 1,
+      "companyId": 1
+    }
+  ]
+}
