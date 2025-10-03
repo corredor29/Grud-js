@@ -33,11 +33,9 @@ class GestorRegions extends HTMLElement {
     this.renderCountriesSelect();
     this.renderRegions();
 
-    // Evento submit
     this.querySelector("#formRegion").addEventListener("submit", this.addRegion.bind(this));
   }
 
-  // --- Helpers para DB ---
   async getData(endpoint) {
     return await fetch(`http://localhost:3000/${endpoint}`).then(res => res.json());
   }
@@ -50,7 +48,6 @@ class GestorRegions extends HTMLElement {
     });
   }
 
-  // --- Add Region ---
   async addRegion(e) {
     e.preventDefault();
     const countryId = this.querySelector("#countrySelect").value;
@@ -62,9 +59,10 @@ class GestorRegions extends HTMLElement {
 
     this.regions = await this.getData("regions");
     this.renderRegions();
+
+    document.getElementById("content").innerHTML = "<gestor-cities></gestor-cities>";
   }
 
-  // --- Render Countries in Select ---
   renderCountriesSelect() {
     const select = this.querySelector("#countrySelect");
     select.innerHTML = `<option value="">Seleccione un país</option>`;
@@ -73,7 +71,6 @@ class GestorRegions extends HTMLElement {
     });
   }
 
-  // --- Render Regions ---
   renderRegions() {
     const lista = this.querySelector("#listaRegions");
     lista.innerHTML = "";

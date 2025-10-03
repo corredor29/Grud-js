@@ -1,15 +1,52 @@
 {
   "countries": [
-    { "id": 1, "name": "Colombia" }
+    {
+      "id": 1,
+      "name": "Colombia"
+    },
+    {
+      "name": "argentina",
+      "id": 2
+    },
+    {
+      "name": "brazil",
+      "id": 3
+    },
+    {
+      "name": "colombia",
+      "id": 4
+    }
   ],
   "regions": [
-    { "id": 1, "name": "Antioquia", "countryId": 1 }
+    {
+      "id": 1,
+      "name": "Antioquia",
+      "countryId": 1
+    },
+    {
+      "name": "buenos aires",
+      "countryId": "2",
+      "id": 2
+    }
   ],
   "cities": [
-    { "id": 1, "name": "Medellín", "regionId": 1 }
+    {
+      "id": 1,
+      "name": "Medellín",
+      "regionId": 1
+    },
+    {
+      "name": "medellin",
+      "countryId": "1",
+      "regionId": "1",
+      "id": 2
+    }
   ],
   "companies": [
-    { "id": 1, "name": "OpenAI S.A.S" }
+    {
+      "id": 1,
+      "name": "OpenAI S.A.S"
+    }
   ],
   "branches": [
     {

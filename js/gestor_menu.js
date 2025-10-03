@@ -10,11 +10,11 @@ class GestorMenu extends HTMLElement {
 
           <div class="collapse navbar-collapse" id="navbarGestores">
             <ul class="navbar-nav me-auto">
-              <li class="nav-item"><a class="nav-link" href="#" data-target="branches">Sucursales</a></li>
-              <li class="nav-item"><a class="nav-link" href="#" data-target="cities">Ciudades</a></li>
-              <li class="nav-item"><a class="nav-link" href="#" data-target="companies">Compañías</a></li>
               <li class="nav-item"><a class="nav-link" href="#" data-target="countries">Países</a></li>
               <li class="nav-item"><a class="nav-link" href="#" data-target="regions">Regiones</a></li>
+              <li class="nav-item"><a class="nav-link" href="#" data-target="cities">Ciudades</a></li>
+              <li class="nav-item"><a class="nav-link" href="#" data-target="companies">Compañías</a></li>
+              <li class="nav-item"><a class="nav-link" href="#" data-target="branches">Sucursales</a></li>
             </ul>
           </div>
         </div>
@@ -32,17 +32,29 @@ class GestorMenu extends HTMLElement {
         e.preventDefault();
         const target = e.target.getAttribute("data-target");
 
-        content.innerHTML = ""; // limpiar contenido dinámico
+        content.innerHTML = ""; 
 
-        switch(target) {
-          case "branches": content.innerHTML = "<gestor-branches></gestor-branches>"; break;
-          case "cities": content.innerHTML = "<gestor-cities></gestor-cities>"; break;
-          case "companies": content.innerHTML = "<gestor-companies></gestor-companies>"; break;
-          case "countries": content.innerHTML = "<gestor-countries></gestor-countries>"; break;
-          case "regions": content.innerHTML = "<gestor-regions></gestor-regions>"; break;
+        switch (target) {
+          case "countries":
+            content.innerHTML = "<gestor-countries></gestor-countries>";
+            break;
+          case "regions":
+            content.innerHTML = "<gestor-regions></gestor-regions>";
+            break;
+          case "cities":
+            content.innerHTML = "<gestor-cities></gestor-cities>";
+            break;
+          case "companies":
+            content.innerHTML = "<gestor-companies></gestor-companies>";
+            break;
+          case "branches":
+            content.innerHTML = "<gestor-branches></gestor-branches>";
+            break;
         }
       });
     });
+
+    content.innerHTML = "<gestor-countries></gestor-countries>";
   }
 }
 

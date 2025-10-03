@@ -7,7 +7,6 @@ class GestorCompanies extends HTMLElement {
             <h4>Gestor de Companies</h4>
           </div>
           <div class="card-body">
-            <!-- Formulario -->
             <h5>Registrar Company</h5>
             <form id="formCompany">
               <input type="text" class="form-control mb-2" id="companyName" placeholder="Nombre de la Company">
@@ -18,7 +17,6 @@ class GestorCompanies extends HTMLElement {
               <button class="btn btn-success">Guardar Company</button>
             </form>
 
-            <!-- Listado -->
             <h5 class="mt-4">Listado de Companies</h5>
             <ul id="listaCompanies" class="list-group"></ul>
           </div>
@@ -36,11 +34,9 @@ class GestorCompanies extends HTMLElement {
     this.renderCities();
     this.renderCompanies();
 
-    // Eventos
     this.querySelector("#formCompany").addEventListener("submit", this.addCompany.bind(this));
   }
 
-  // --- Helpers para DB ---
   async getData(endpoint) {
     return await fetch(`http://localhost:3000/${endpoint}`).then(res => res.json());
   }
@@ -53,7 +49,6 @@ class GestorCompanies extends HTMLElement {
     });
   }
 
-  // --- Render Cities ---
   renderCities() {
     const select = this.querySelector("#citySelect");
     select.innerHTML = `<option value="">Seleccione una ciudad</option>`;
@@ -62,7 +57,6 @@ class GestorCompanies extends HTMLElement {
     });
   }
 
-  // --- Add Company ---
   async addCompany(e) {
     e.preventDefault();
 
@@ -76,15 +70,14 @@ class GestorCompanies extends HTMLElement {
 
     await this.postData("companies", { name, UKNiu, address, email, cityId });
 
-    // limpiar
     this.querySelector("#formCompany").reset();
 
-    // refrescar lista
     this.companies = await this.getData("companies");
     this.renderCompanies();
+
+    document.getElementById("content").innerHTML = "<gestor-branches></gestor-branches>";
   }
 
-  // --- Render Companies ---
   renderCompanies() {
     const lista = this.querySelector("#listaCompanies");
     lista.innerHTML = "";

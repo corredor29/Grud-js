@@ -29,11 +29,9 @@ class GestorCountries extends HTMLElement {
     this.countries = await this.getData("countries");
     this.renderCountries();
 
-    // Evento de submit
     this.querySelector("#formCountry").addEventListener("submit", this.addCountry.bind(this));
   }
 
-  // --- Helpers para DB ---
   async getData(endpoint) {
     return await fetch(`http://localhost:3000/${endpoint}`).then(res => res.json());
   }
@@ -46,7 +44,6 @@ class GestorCountries extends HTMLElement {
     });
   }
 
-  // --- Add Country ---
   async addCountry(e) {
     e.preventDefault();
     const name = this.querySelector("#countryName").value.trim();
@@ -57,9 +54,10 @@ class GestorCountries extends HTMLElement {
 
     this.countries = await this.getData("countries");
     this.renderCountries();
+
+    document.getElementById("content").innerHTML = "<gestor-regions></gestor-regions>";
   }
 
-  // --- Render Countries ---
   renderCountries() {
     const lista = this.querySelector("#listaCountries");
     lista.innerHTML = "";
