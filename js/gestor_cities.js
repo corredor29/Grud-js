@@ -16,12 +16,12 @@ class GestorCities extends HTMLElement {
             </form>
 
             <h5 class="mt-4">Listado de Ciudades</h5>
-            <ul id="listaCities" class="list-group"></ul>
+            <button id="toggleCities" class="btn btn-outline-info mb-2">Mostrar Lista</button>
+            <ul id="listaCities" class="list-group d-none"></ul>
           </div>
         </div>
       </div>
     `;
-
     this.init();
   }
 
@@ -35,6 +35,7 @@ class GestorCities extends HTMLElement {
 
     this.querySelector("#formCity").addEventListener("submit", this.addCity.bind(this));
     this.querySelector("#countrySelect").addEventListener("change", this.handleCountryChange.bind(this));
+    this.querySelector("#toggleCities").addEventListener("click", this.toggleCities.bind(this));
   }
 
   async getData(endpoint) {
@@ -49,6 +50,20 @@ class GestorCities extends HTMLElement {
     });
   }
 
+  async putData(endpoint, id, data) {
+    await fetch(`http://localhost:3000/${endpoint}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+  }
+
+  async deleteData(endpoint, id) {
+    await fetch(`http://localhost:3000/${endpoint}/${id}`, {
+      method: "DELETE"
+    });
+  }
+
   async addCity(e) {
     e.preventDefault();
     const countryId = this.querySelector("#countrySelect").value;
@@ -58,12 +73,14 @@ class GestorCities extends HTMLElement {
     if (!name || !countryId || !regionId) return;
 
     await this.postData("cities", { name, countryId, regionId });
-    this.querySelector("#cityName").value = "";
+    this.querySelector("#formCity").reset();
 
     this.cities = await this.getData("cities");
     this.renderCities();
 
-    document.getElementById("content").innerHTML = "<gestor-companies></gestor-companies>";
+    if (this.cities.length === 1) {
+      this.dispatchEvent(new CustomEvent("next-step", { detail: "companies", bubbles: true }));
+    }
   }
 
   renderCountriesSelect() {
@@ -92,6 +109,13 @@ class GestorCities extends HTMLElement {
     regionSelect.disabled = false;
   }
 
+  toggleCities() {
+    const lista = this.querySelector("#listaCities");
+    lista.classList.toggle("d-none");
+    this.querySelector("#toggleCities").textContent = 
+      lista.classList.contains("d-none") ? "Mostrar Lista" : "Ocultar Lista";
+  }
+
   renderCities() {
     const lista = this.querySelector("#listaCities");
     lista.innerHTML = "";
@@ -100,11 +124,36 @@ class GestorCities extends HTMLElement {
       const country = this.countries.find(c => c.id == city.countryId);
       const region = this.regions.find(r => r.id == city.regionId);
 
-      lista.innerHTML += `
-        <li class="list-group-item">
-          ${city.name} 
-          (${region ? region.name : "Sin región"}, ${country ? country.name : "Sin país"})
-        </li>`;
+      const li = document.createElement("li");
+      li.classList.add("list-group-item");
+
+      li.innerHTML = `
+        <strong>${city.name}</strong> 
+        (${region ? region.name : "Sin región"}, ${country ? country.name : "Sin país"})
+        <div class="mt-2">
+          <button class="btn btn-sm btn-warning me-2">Editar</button>
+          <button class="btn btn-sm btn-danger">Eliminar</button>
+        </div>
+      `;
+
+      // Editar ciudad
+      li.querySelector(".btn-warning").addEventListener("click", async () => {
+        const newName = prompt("Nuevo nombre de la ciudad:", city.name);
+        if (!newName) return;
+        await this.putData("cities", city.id, { ...city, name: newName });
+        this.cities = await this.getData("cities");
+        this.renderCities();
+      });
+
+      // Eliminar ciudad
+      li.querySelector(".btn-danger").addEventListener("click", async () => {
+        if (!confirm(`¿Eliminar la ciudad ${city.name}?`)) return;
+        await this.deleteData("cities", city.id);
+        this.cities = await this.getData("cities");
+        this.renderCities();
+      });
+
+      lista.appendChild(li);
     });
   }
 }

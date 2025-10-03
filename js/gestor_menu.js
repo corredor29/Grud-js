@@ -22,6 +22,8 @@ class GestorMenu extends HTMLElement {
     `;
 
     this.initMenu();
+    // cargar inicio en "Países"
+    this.loadComponent("countries", document.getElementById("content"));
   }
 
   initMenu() {
@@ -31,30 +33,47 @@ class GestorMenu extends HTMLElement {
       link.addEventListener("click", e => {
         e.preventDefault();
         const target = e.target.getAttribute("data-target");
-
-        content.innerHTML = ""; 
-
-        switch (target) {
-          case "countries":
-            content.innerHTML = "<gestor-countries></gestor-countries>";
-            break;
-          case "regions":
-            content.innerHTML = "<gestor-regions></gestor-regions>";
-            break;
-          case "cities":
-            content.innerHTML = "<gestor-cities></gestor-cities>";
-            break;
-          case "companies":
-            content.innerHTML = "<gestor-companies></gestor-companies>";
-            break;
-          case "branches":
-            content.innerHTML = "<gestor-branches></gestor-branches>";
-            break;
-        }
+        this.loadComponent(target, content);
       });
     });
 
-    content.innerHTML = "<gestor-countries></gestor-countries>";
+    // flujo automático
+    content.addEventListener("next-step", e => {
+      this.loadComponent(e.detail, content);
+    });
+  }
+
+  loadComponent(target, content) {
+    content.innerHTML = ""; 
+
+    // limpiar clases activas
+    this.querySelectorAll("a[data-target]").forEach(link => {
+      link.classList.remove("active");
+    });
+
+    // activar pestaña correspondiente
+    const activeLink = this.querySelector(`a[data-target="${target}"]`);
+    if (activeLink) {
+      activeLink.classList.add("active");
+    }
+
+    switch (target) {
+      case "countries":
+        content.innerHTML = "<gestor-countries></gestor-countries>";
+        break;
+      case "regions":
+        content.innerHTML = "<gestor-regions></gestor-regions>";
+        break;
+      case "cities":
+        content.innerHTML = "<gestor-cities></gestor-cities>";
+        break;
+      case "companies":
+        content.innerHTML = "<gestor-companies></gestor-companies>";
+        break;
+      case "branches":
+        content.innerHTML = "<gestor-branches></gestor-branches>";
+        break;
+    }
   }
 }
 

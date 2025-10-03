@@ -1,43 +1,47 @@
 class GestorRegions extends HTMLElement {
-  connectedCallback() {
+  async connectedCallback() {
     this.innerHTML = `
-      <div class="container mt-4">
-        <div class="card shadow">
-          <div class="card-header bg-warning text-dark">
-            <h4>Gestor de Regiones</h4>
-          </div>
-          <div class="card-body">
-            <!-- Formulario -->
-            <h5>Registrar Región</h5>
-            <form id="formRegion">
-              <select class="form-select mb-2" id="countrySelect"></select>
-              <input type="text" class="form-control mb-2" id="regionName" placeholder="Nombre de la Región">
-              <button class="btn btn-warning">Guardar Región</button>
-            </form>
+      <div class="card mt-4 shadow">
+        <div class="card-header bg-warning text-dark fw-bold">Gestor de Regiones</div>
+        <div class="card-body">
+          <form id="formRegion" class="mb-3">
+            <select id="countryId" class="form-select mb-2">
+              <option value="">Seleccione un país</option>
+            </select>
+            <input type="text" id="regionName" class="form-control mb-2" placeholder="Nombre de la Región">
+            <button type="submit" class="btn btn-warning">Guardar Región</button>
+          </form>
 
-            <!-- Listado -->
-            <h5 class="mt-4">Listado de Regiones</h5>
-            <ul id="listaRegions" class="list-group"></ul>
+          <button id="toggleList" class="btn btn-secondary mb-3">Mostrar Lista</button>
+
+          <div id="regionsContainer" style="display:none;">
+            <h5>Listado de Regiones</h5>
+            <ul id="regionsList" class="list-group"></ul>
           </div>
         </div>
       </div>
     `;
 
-    this.init();
-  }
+    this.form = this.querySelector("#formRegion");
+    this.countryIdInput = this.querySelector("#countryId");
+    this.regionNameInput = this.querySelector("#regionName");
+    this.list = this.querySelector("#regionsList");
+    this.container = this.querySelector("#regionsContainer");
+    this.toggleBtn = this.querySelector("#toggleList");
 
-  async init() {
-    this.countries = await this.getData("countries");
     this.regions = await this.getData("regions");
+    this.countries = await this.getData("countries");
 
-    this.renderCountriesSelect();
+    this.renderCountries();
     this.renderRegions();
 
-    this.querySelector("#formRegion").addEventListener("submit", this.addRegion.bind(this));
+    this.form.addEventListener("submit", e => this.addRegion(e));
+    this.toggleBtn.addEventListener("click", () => this.toggleList());
   }
 
   async getData(endpoint) {
-    return await fetch(`http://localhost:3000/${endpoint}`).then(res => res.json());
+    const res = await fetch(`http://localhost:3000/${endpoint}`);
+    return await res.json();
   }
 
   async postData(endpoint, data) {
@@ -48,36 +52,94 @@ class GestorRegions extends HTMLElement {
     });
   }
 
-  async addRegion(e) {
-    e.preventDefault();
-    const countryId = this.querySelector("#countrySelect").value;
-    const name = this.querySelector("#regionName").value.trim();
-    if (!name || !countryId) return;
-
-    await this.postData("regions", { name, countryId });
-    this.querySelector("#regionName").value = "";
-
-    this.regions = await this.getData("regions");
-    this.renderRegions();
-
-    document.getElementById("content").innerHTML = "<gestor-cities></gestor-cities>";
+  async deleteData(endpoint, id) {
+    await fetch(`http://localhost:3000/${endpoint}/${id}`, {
+      method: "DELETE"
+    });
   }
 
-  renderCountriesSelect() {
-    const select = this.querySelector("#countrySelect");
-    select.innerHTML = `<option value="">Seleccione un país</option>`;
+  async putData(endpoint, id, data) {
+    await fetch(`http://localhost:3000/${endpoint}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+  }
+
+  renderCountries() {
+    this.countryIdInput.innerHTML = `<option value="">Seleccione un país</option>`;
     this.countries.forEach(c => {
-      select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+      this.countryIdInput.innerHTML += `<option value="${c.id}">${c.name}</option>`;
     });
   }
 
   renderRegions() {
-    const lista = this.querySelector("#listaRegions");
-    lista.innerHTML = "";
-    this.regions.forEach(region => {
-      const country = this.countries.find(c => c.id == region.countryId);
-      lista.innerHTML += `<li class="list-group-item">${region.name} (${country ? country.name : "Sin país"})</li>`;
+    this.list.innerHTML = "";
+    this.regions.forEach(r => {
+      const country = this.countries.find(c => c.id == r.countryId);
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex justify-content-between align-items-center";
+      li.innerHTML = `
+        <span>${r.name} (${country ? country.name : "Sin país"})</span>
+        <div>
+          <button class="btn btn-sm btn-primary me-1 btn-edit"> Editar</button>
+          <button class="btn btn-sm btn-danger btn-delete"> Eliminar</button>
+        </div>
+      `;
+
+      // Botón eliminar
+      li.querySelector(".btn-delete").addEventListener("click", async () => {
+        if (confirm("¿Seguro que deseas eliminar esta región?")) {
+          await this.deleteData("regions", r.id);
+          this.regions = await this.getData("regions");
+          this.renderRegions();
+        }
+      });
+
+      // Botón editar
+      li.querySelector(".btn-edit").addEventListener("click", async () => {
+        const nuevoNombre = prompt("Nuevo nombre de la región:", r.name);
+        if (nuevoNombre) {
+          await this.putData("regions", r.id, { ...r, name: nuevoNombre });
+          this.regions = await this.getData("regions");
+          this.renderRegions();
+        }
+      });
+
+      this.list.appendChild(li);
     });
+  }
+
+  toggleList() {
+    if (this.container.style.display === "none") {
+      this.container.style.display = "block";
+      this.toggleBtn.textContent = "Ocultar Lista";
+    } else {
+      this.container.style.display = "none";
+      this.toggleBtn.textContent = "Mostrar Lista";
+    }
+  }
+
+  async addRegion(e) {
+    e.preventDefault();
+    const name = this.regionNameInput.value.trim();
+    const countryId = this.countryIdInput.value;
+
+    if (!name || !countryId) {
+      alert("Debes ingresar nombre y seleccionar un país");
+      return;
+    }
+
+    await this.postData("regions", { name, countryId });
+    this.form.reset();
+
+    this.regions = await this.getData("regions");
+    this.renderRegions();
+
+    // ✅ Avanzar solo si es la primera región registrada
+    if (this.regions.length === 1) {
+      this.dispatchEvent(new CustomEvent("next-step", { detail: "cities", bubbles: true }));
+    }
   }
 }
 

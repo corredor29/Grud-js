@@ -16,8 +16,12 @@ class GestorBranches extends HTMLElement {
               <button class="btn btn-danger">Guardar Sucursal</button>
             </form>
 
-            <h5 class="mt-4">Listado de Sucursales</h5>
-            <ul id="listaBranches" class="list-group"></ul>
+            <button id="toggleList" class="btn btn-secondary mt-3">Mostrar Lista</button>
+
+            <div id="branchesContainer" style="display:none;" class="mt-3">
+              <h5>Listado de Sucursales</h5>
+              <ul id="listaBranches" class="list-group"></ul>
+            </div>
           </div>
         </div>
       </div>
@@ -34,6 +38,7 @@ class GestorBranches extends HTMLElement {
     this.renderBranches();
 
     this.querySelector("#formBranch").addEventListener("submit", this.addBranch.bind(this));
+    this.querySelector("#toggleList").addEventListener("click", this.toggleList.bind(this));
   }
 
   async getData(endpoint) {
@@ -43,6 +48,18 @@ class GestorBranches extends HTMLElement {
   async postData(endpoint, data) {
     await fetch(`http://localhost:3000/${endpoint}`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+  }
+
+  async deleteData(endpoint, id) {
+    await fetch(`http://localhost:3000/${endpoint}/${id}`, { method: "DELETE" });
+  }
+
+  async putData(endpoint, id, data) {
+    await fetch(`http://localhost:3000/${endpoint}/${id}`, {
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
@@ -73,21 +90,75 @@ class GestorBranches extends HTMLElement {
     this.branches = await this.getData("branches");
     this.renderBranches();
 
-    document.getElementById("content").innerHTML = "<gestor-countries></gestor-countries>";
+    // 🔥 Nueva lógica: avanzar SOLO si es la primera sucursal
+    if (this.branches.length === 1) {
+      document.getElementById("content").innerHTML = "<gestor-countries></gestor-countries>";
+    }
   }
 
   renderBranches() {
     const lista = this.querySelector("#listaBranches");
     lista.innerHTML = "";
+
     this.branches.forEach(b => {
       const company = this.companies.find(c => c.id == b.companyId);
-      lista.innerHTML += `
-        <li class="list-group-item">
+
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex justify-content-between align-items-center";
+
+      li.innerHTML = `
+        <div>
           <strong>${b.name}</strong> - ${b.address}
           <br><small>Email: ${b.email}</small>
           <br><em>Compañía: ${company ? company.name : "Sin compañía"}</em>
-        </li>`;
+        </div>
+        <div>
+          <button class="btn btn-sm btn-primary me-1 btn-edit"> Editar</button>
+          <button class="btn btn-sm btn-danger btn-delete"> Eliminar</button>
+        </div>
+      `;
+
+      // Botón eliminar
+      li.querySelector(".btn-delete").addEventListener("click", async () => {
+        if (confirm("¿Seguro que deseas eliminar esta sucursal?")) {
+          await this.deleteData("branches", b.id);
+          this.branches = await this.getData("branches");
+          this.renderBranches();
+        }
+      });
+
+      // Botón editar
+      li.querySelector(".btn-edit").addEventListener("click", async () => {
+        const nuevoNombre = prompt("Nuevo nombre de la sucursal:", b.name);
+        const nuevaDireccion = prompt("Nueva dirección:", b.address);
+        const nuevoEmail = prompt("Nuevo email:", b.email);
+
+        if (nuevoNombre && nuevaDireccion && nuevoEmail) {
+          await this.putData("branches", b.id, {
+            ...b,
+            name: nuevoNombre,
+            address: nuevaDireccion,
+            email: nuevoEmail
+          });
+          this.branches = await this.getData("branches");
+          this.renderBranches();
+        }
+      });
+
+      lista.appendChild(li);
     });
+  }
+
+  toggleList() {
+    const container = this.querySelector("#branchesContainer");
+    const btn = this.querySelector("#toggleList");
+    if (container.style.display === "none") {
+      container.style.display = "block";
+      btn.textContent = "Ocultar Lista";
+    } else {
+      container.style.display = "none";
+      btn.textContent = "Mostrar Lista";
+    }
   }
 }
 

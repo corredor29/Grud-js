@@ -3,61 +3,21 @@
     {
       "id": 1,
       "name": "Colombia"
-    },
-    {
-      "name": "argentina",
-      "id": 2
-    },
-    {
-      "name": "brazil",
-      "id": 3
-    },
-    {
-      "name": "colombia",
-      "id": 4
     }
   ],
   "regions": [
     {
-      "id": 1,
-      "name": "Antioquia",
-      "countryId": 1
-    },
-    {
-      "name": "buenos aires",
-      "countryId": "2",
-      "id": 2
-    }
-  ],
-  "cities": [
-    {
-      "id": 1,
-      "name": "Medellín",
-      "regionId": 1
-    },
-    {
-      "name": "medellin",
+      "name": "a",
       "countryId": "1",
-      "regionId": "1",
-      "id": 2
+      "id": 6
     }
   ],
+  "cities": [],
   "companies": [
     {
       "id": 1,
-      "name": "OpenAI S.A.S"
+      "name": "campusland"
     }
   ],
-  "branches": [
-    {
-      "id": 1,
-      "numberCommercial": "001",
-      "address": "Calle 10 #20-30",
-      "email": "contacto@openai.com",
-      "contact_name": "Juan Pérez",
-      "phone": "3001234567",
-      "cityId": 1,
-      "companyId": 1
-    }
-  ]
+  "branches": []
 }
